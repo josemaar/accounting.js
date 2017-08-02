@@ -60,7 +60,7 @@
 	}
 
 	/**
-	 * Tests whether supplied parameter is a string
+	 * Tests whether supplied parameter is an array
 	 * from underscore.js, delegates to ECMA5's native Array.isArray
 	 */
 	function isArray(obj) {
@@ -199,7 +199,7 @@
 		var regex = new RegExp("[^0-9-" + decimal + "]", ["g"]),
 			unformatted = parseFloat(
 				("" + value)
-				.replace(/\((.*)\)/, "-$1") // replace bracketed values with negatives
+				.replace(/\((?=\d+)(.*)\)/, "-$1") // replace bracketed values with negatives
 				.replace(regex, '')         // strip out any cruft
 				.replace(decimal, '.')      // make sure decimal point is standard
 			);
@@ -217,10 +217,12 @@
 	 */
 	var toFixed = lib.toFixed = function(value, precision) {
 		precision = checkPrecision(precision, lib.settings.number.precision);
-		var power = Math.pow(10, precision);
+		
+		var exponentialForm = Number(lib.unformat(value) + 'e' + precision);
+		var rounded = Math.round(exponentialForm);
+		var finalResult = Number(rounded + 'e-' + precision).toFixed(precision);
+		return finalResult;
 
-		// Multiply up by precision, round accurately, then divide and use native toFixed():
-		return (Math.round(lib.unformat(value) * power) / power).toFixed(precision);
 	};
 
 
@@ -267,7 +269,7 @@
 	};
 
 	function groupNumbers(reverseBase,separator, groupSize){
-		separator = separator || lib.settings.number.thousand;
+		separator = separator === undefined ? lib.settings.number.thousand : separator; // we should allow (allow empty/zero values)
 		startIndex = 0;
 		if (groupSize == "Indian") {
 			reverseBase.splice(3, 0, separator)
@@ -343,7 +345,7 @@
 	 * browsers from collapsing the whitespace in the output strings.
 	 */
 	lib.formatColumn = function(list, symbol, precision, thousand, decimal, format) {
-		if (!list) return [];
+		if (!list || !isArray(list)) return [];
 
 		// Build options object from second param (if object) or all params, extending defaults:
 		var opts = defaults(
