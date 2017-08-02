@@ -1,5 +1,5 @@
 {
-	"name" : "accounting",
+	"name" : "accounting-rupee-support",
 	"description" : "number, money and currency formatting library",
 	"homepage": "http://openexchangerates.github.io/accounting.js",
 	"license": "MIT",
